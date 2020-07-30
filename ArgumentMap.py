@@ -18,7 +18,6 @@ class argBERT(nn.Module):
 
     def __init__(self, model_name: str = 'argBERT-type-included', device: str = None):
         super(argBERT, self).__init__()
-        model_name = 'pretrained_models/' + model_name
         self.argBERT = RobertaForSequenceClassification.from_pretrained(model_name)
         self.tokenizer = RobertaTokenizer.from_pretrained(model_name, bos_token='<s>', eos_token='</s>',
                                                           unk_token='<unk>',
