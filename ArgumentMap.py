@@ -59,6 +59,7 @@ class argBERT(nn.Module):
             self.best_num_correct = num_correct
             print("Saving new model ------")
             self.save_model(output_path)
+            self.smallest_total_misses = total_misses
           elif num_correct == self.best_num_correct:
             if total_misses < self.smallest_total_misses:
               self.smallest_total_misses = total_misses
