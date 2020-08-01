@@ -35,11 +35,11 @@ takes enhanced parent text snippets that contain IDEA, ISSUE, PRO, CON, as well 
 
 [enhanced parent text] + [new statement type + new statement text] --> argBERT-type-included --> taxonomic distance score
 
-**argBERT-DriverlessCar-type-included**
+**argBERT-DriverlessCar**
 
 map specific version of argBERT-type-included.
 
-**argBERT-GlobalWarming-type-included** 
+**warming_roBERTa_model_enhanced_90** 
 
 map specific version of argBERT-type-included.
 
