@@ -1,5 +1,5 @@
 # NewStatementPlacement
-Reccomends a placement for an argument on a deliberation map.
+Reccomends a placement for an argument on a deliberation map. LICENSE:'Attribution-NonCommercial-ShareAlike 3.0'
 # Setup
 Requirements: transformers 3.0.2, torch 1.2.0, numpy, pandas
 
