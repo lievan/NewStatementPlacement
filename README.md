@@ -3,15 +3,20 @@ Reccomends a placement for an argument on a deliberation map. LICENSE:'Attributi
 # Setup
 Requirements: transformers 3.0.2, torch 1.2.0, numpy, pandas
 
+```
+pip install requirements.txt
+
+```
+
 **install git-lfs**
 ```
-! sudo apt-get install git-lfs
+sudo apt-get install git-lfs
 ```
 
 **clone this repo**
 Clong the whole repo would download the four argBERT models, taking about 5 GB of space
 ```
-! git lfs clone https://github.com/lievan/NewStatementPlacement.git
+git lfs clone https://github.com/lievan/NewStatementPlacement.git
 ```
 
 **import ArgumentMap module**
