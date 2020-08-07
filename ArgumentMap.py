@@ -31,7 +31,6 @@ class argBERT(nn.Module):
         self.best_num_correct = 0
         self.smallest_total_misses = 1000
 
-
     def fine_tune_model(self, training_data, test_samples, arg_map, output_path, bare_text=True):
         seed_val = 32
         random.seed(seed_val)
@@ -44,30 +43,30 @@ class argBERT(nn.Module):
 
         for epoch_i in range(0, epochs):
 
-          print("")
-          print('======== Epoch {:} / {:} ========'.format(epoch_i + 1, epochs))
-          print('Training...')
-          self.train_data(train_dataloader)
-          print("")
-          print("Running Validation...")
+            print("")
+            print('======== Epoch {:} / {:} ========'.format(epoch_i + 1, epochs))
+            print('Training...')
+            self.train_data(train_dataloader)
+            print("")
+            print("Running Validation...")
 
-          self.argBERT.eval()
+            self.argBERT.eval()
 
-          num_correct, total_misses = evaluate_map(test_samples, arg_map, self, bare_text=bare_text)
+            num_correct, total_misses = evaluate_map(test_samples, arg_map, self, bare_text=bare_text)
 
-          if num_correct > self.best_num_correct:
-            self.best_num_correct = num_correct
-            print("Saving new model ------")
-            self.save_model(output_path)
-            self.smallest_total_misses = total_misses
-          elif num_correct == self.best_num_correct:
-            if total_misses < self.smallest_total_misses:
-              self.smallest_total_misses = total_misses
-              print("Saving new model ------")
-              self.save_model(output_path)
+            if num_correct > self.best_num_correct:
+                self.best_num_correct = num_correct
+                print("Saving new model ------")
+                self.save_model(output_path)
+                self.smallest_total_misses = total_misses
+            elif num_correct == self.best_num_correct:
+                if total_misses < self.smallest_total_misses:
+                    self.smallest_total_misses = total_misses
+                    print("Saving new model ------")
+                    self.save_model(output_path)
 
         print("loading best model...")
-        self.argBERT, self.tokenizer = self.load_model(output_path)
+        self.argBERT = self.load_model(output_path)
 
     def train_data(self, train_dataloader, epochs=10):
 
@@ -162,18 +161,18 @@ class argBERT(nn.Module):
         return train_dataloader
 
     def save_model(self, output_dir):
-      if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-      print("Saving model to %s" % output_dir)
-      model_to_save = self.argBERT.module if hasattr(self.argBERT, 'module') else self.argBERT
-      model_to_save.save_pretrained(output_dir)
-      self.tokenizer.save_pretrained(output_dir)
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
+        print("Saving model to %s" % output_dir)
+        model_to_save = self.argBERT.module if hasattr(self.argBERT, 'module') else self.argBERT
+        model_to_save.save_pretrained(output_dir)
+        self.tokenizer.save_pretrained(output_dir)
 
     def load_model(self, output_dir):
-      loaded_model=RobertaForSequenceClassification.from_pretrained(output_dir)
-      tokenizer=RobertaTokenizer.from_pretrained(output_dir)
-      loaded_model.to(self.device)
-      return loaded_model, tokenizer
+        loaded_model = RobertaForSequenceClassification.from_pretrained(output_dir)
+        tokenizer = RobertaTokenizer.from_pretrained(output_dir)
+        loaded_model.to(self.device)
+        return loaded_model
 
     def predict_distance(self, parent_text, child_text):
         self.argBERT.eval()
@@ -208,20 +207,20 @@ class Argument:
         if str(text) != "nan" and name is not None:
             text = re.sub(r'http\S+', '', text)
             if bare_text:
-              self.text = name + " " + text
+                self.text = name + " " + text
             else:
-              self.text = type + " " + name + " " + text
+                self.text = type + " " + name + " " + text
         elif name is None:
             text = re.sub(r'http\S+', '', text)
-            if not bare_text:
-              self.text = name + " " + text
+            if bare_text:
+                self.text = text
             else:
-              self.text = type + " " + text
+                self.text = type + " " + text
         else:
-            if not bare_text:
-              self.text = name
+            if bare_text:
+                self.text = name
             else:
-              self.text = type + " " + name
+                self.text = type + " " + name
         child_list = []
         if children is not None:
             children = children.strip(')')
@@ -238,11 +237,12 @@ class Argument:
         self.children_objs = children
 
 
-def get_parent_plus_children(argument, compared_child, bare_text=True):
+def get_parent_plus_children(argument, compared_child, bare_text=True, synthetic=False, get_sentences=None):
     full_text = ""
     full_text += argument.text
+
     if not bare_text:
-      if argument.parent is not None:
+        if argument.parent is not None:
             full_text += " PARENT: "
             parent_text = argument.parent.text
             if len(argument.parent.text.split()) > 10:
@@ -250,10 +250,19 @@ def get_parent_plus_children(argument, compared_child, bare_text=True):
                 sep = ' '
                 parent_text = sep.join(text_list[:10])
             full_text += parent_text
-    for child in argument.children_objs:
-        if child.text != compared_child:
-            full_text += " "
-            full_text += child.text
+
+    if synthetic == True:
+        # we have a list of tuples that can be joined
+        # we want to append all children to this get_parent_plus children while excluding text snippets that
+        for sentence in get_sentences:
+            if sentence not in compared_child:
+                full_text += " "
+                full_text += sentence
+    else:
+        for child in argument.children_objs:
+            if child.text != compared_child:
+                full_text += " "
+                full_text += child.text
     return full_text
 
 
@@ -336,14 +345,16 @@ def arguments_to_pairs(argument_list, bare_text):
         if possible_response(combo[0], combo[1]):
             distance = taxonomic_distance(combo[0], combo[1], argument_list)
 
-            pairs.append([get_parent_plus_children(combo[0], combo[1].text, bare_text=bare_text), combo[1].text, distance])
+            pairs.append(
+                [get_parent_plus_children(combo[0], combo[1].text, bare_text=bare_text), combo[1].text, distance])
 
             taxonomic_distance_list.append(distance)
         elif possible_response(combo[1], combo[0]):
 
             distance = taxonomic_distance(combo[1], combo[0], argument_list)
 
-            pairs.append([get_parent_plus_children(combo[1], combo[0].text, bare_text=bare_text), combo[0].text, distance])
+            pairs.append(
+                [get_parent_plus_children(combo[1], combo[0].text, bare_text=bare_text), combo[0].text, distance])
 
             taxonomic_distance_list.append(distance)
     return pairs, taxonomic_distance_list
@@ -382,6 +393,29 @@ def balance_data(dataset, max_length):
     return test_data
 
 
+def get_synthetic_data(parent, bare_text):
+    get_sentences = []
+    for child in parent.children_objs:
+        child_snippets = re.split('[?.!]', child.text)
+        for snippet in child_snippets:
+            if snippet != '':
+                get_sentences.append(snippet)
+
+    combinations_object = itertools.combinations(get_sentences, 2)
+    combinations_list = list(combinations_object)
+
+    training_data = []
+    for combo in combinations_list:
+        parent_text = get_parent_plus_children(parent, combo, bare_text=bare_text, synthetic=True,
+                                               get_sentences=get_sentences)
+        new_child = ''
+        for text in combo:
+            new_child += " "
+            new_child += text
+        training_data.append([parent_text, new_child, 1])
+    return training_data
+
+
 def get_arg_from_entity(parent_entity, arg_map):
     for arg in arg_map.argument_list:
         if arg.entity == parent_entity:
@@ -390,37 +424,40 @@ def get_arg_from_entity(parent_entity, arg_map):
 
 
 class Argument_Map:
-    def __init__(self, map_name, bare_text=True):
+    def __init__(self, map_name, bare_text=True, is_empty=False):
         self.argument_list = []
         self.new_training_data = []
         self.max_traverse_steps = 0
-        test_df_dc = pd.read_csv(map_name, delimiter="\t", header=0)
-        entities = test_df_dc.Entity.values
-        types = test_df_dc.Type.values
-        names = test_df_dc.Name.values
-        descriptions = test_df_dc.Description.values
-        children = test_df_dc.Children.values
 
-        for entity, type, name, description, childs in zip(entities, types, names, descriptions, children):
-            entity = entity.strip('(')
-            entity = entity.strip(')')
-            self.argument_list.append(Argument(entity, type, name, description, childs, bare_text=bare_text))
-        for i in range(len(self.argument_list)):
-            children_objs = []
-            parent = None
-            for arg in self.argument_list:
-                if arg.entity in self.argument_list[i].children_entities:
-                    children_objs.append(arg)
-                if self.argument_list[i].entity in arg.children_entities:
-                    parent = arg
-            self.argument_list[i].initialize_children(children_objs)
-            self.argument_list[i].initialize_parent(parent)
+        if not is_empty:
+            test_df_dc = pd.read_csv(map_name, delimiter="\t", header=0)
+            entities = test_df_dc.Entity.values
+            types = test_df_dc.Type.values
+            names = test_df_dc.Name.values
+            descriptions = test_df_dc.Description.values
+            children = test_df_dc.Children.values
+
+            for entity, type, name, description, childs in zip(entities, types, names, descriptions, children):
+                entity = entity.strip('(')
+                entity = entity.strip(')')
+                self.argument_list.append(Argument(entity, type, name, description, childs, bare_text=bare_text))
+            for i in range(len(self.argument_list)):
+                children_objs = []
+                parent = None
+                for arg in self.argument_list:
+                    if arg.entity in self.argument_list[i].children_entities:
+                        children_objs.append(arg)
+                    if self.argument_list[i].entity in arg.children_entities:
+                        parent = arg
+                self.argument_list[i].initialize_children(children_objs)
+                self.argument_list[i].initialize_parent(parent)
 
     def add_argument(self, new_statement, parent_entity):
-        parent = get_arg_from_entity(parent_entity, self)
-        new_statement.initialize_parent(parent)
         self.argument_list.append(new_statement)
-        self.argument_list[self.argument_list.index(parent)].children_objs.append(new_statement)
+        if parent_entity != None:
+            parent = get_arg_from_entity(parent_entity, self)
+            new_statement.initialize_parent(parent)
+            self.argument_list[self.argument_list.index(parent)].children_objs.append(new_statement)
 
     def add_new_training_data(self, new_statement, parent_entity, viable_placement_entities):
         max_steps = 0
@@ -445,7 +482,7 @@ class Argument_Map:
 
         self.new_training_data = self.new_training_data + new_data
 
-    def create_dataset(self, test_size, bare_text=True):
+    def create_dataset(self, test_size, bare_text=True, add_synthetic_data=False):
         random_argument_list = self.argument_list
         random.shuffle(random_argument_list)
         test_data = []
@@ -453,11 +490,15 @@ class Argument_Map:
         count = 0
         for arg in self.argument_list:
             if not arg.children_objs and count < test_size:
-                test_data.append(arg)
-                count += 1
+                if len(arg.text.split()) > 10:
+                    test_data.append(arg)
+                    count += 1
             else:
                 train_data.append(arg)
         training_data, taxonomic_distance_list = arguments_to_pairs(train_data, bare_text=bare_text)
+        if add_synthetic_data == True:
+            for parent in self.argument_list:
+                training_data += get_synthetic_data(parent, bare_text=bare_text)
         self.max_traverse_steps = max(taxonomic_distance_list)
         return training_data, test_data
 
@@ -491,7 +532,8 @@ def get_reccomendations(argument, type, argument_map, argBERT_model, bare_text=T
                     largest = recs[i][0]
                     worst_index = i
 
-            distance = argBERT_model.predict_distance(get_parent_plus_children(potential_parent, argument, bare_text=bare_text), argument)
+            distance = argBERT_model.predict_distance(
+                get_parent_plus_children(potential_parent, argument, bare_text=bare_text), argument)
 
             if distance < recs[worst_index][0]:
                 recs[worst_index] = [distance, potential_parent, argument_map.argument_list.index(potential_parent)]
@@ -541,7 +583,7 @@ def input_arguments(arg_map, argBERT_model, bare_text=True):
     return arg_map
 
 
-def initialize_map(map_name, dataset_length=30, includes_type=True, bare_text=True):
+def initialize_map(map_name, dataset_length=30, includes_type=True, bare_text=True, add_synthetic_data=False):
     arg_map = Argument_Map(map_name, bare_text=bare_text)
 
     print("Argument map initialized: displaying first 10 arguments")
@@ -553,7 +595,8 @@ def initialize_map(map_name, dataset_length=30, includes_type=True, bare_text=Tr
 
     print("Data/training set --------")
 
-    dataset, test_samples = arg_map.create_dataset(dataset_length, bare_text=bare_text)
+    dataset, test_samples = arg_map.create_dataset(dataset_length, bare_text=bare_text,
+                                                   add_synthetic_data=add_synthetic_data)
 
     max_steps = 0
     for sample in dataset:
@@ -584,7 +627,8 @@ def evaluate_map(test_samples, arg_map, argBERT_model, display_results_only=True
         if arg.type in arg_types:
 
             if arg.parent is not None:
-                parent_score = argBERT_model.predict_distance(get_parent_plus_children(arg.parent, arg.text, bare_text=bare_text), arg.text)
+                parent_score = argBERT_model.predict_distance(
+                    get_parent_plus_children(arg.parent, arg.text, bare_text=bare_text), arg.text)
                 total_parent_score += parent_score
                 if not display_results_only:
                     print(" ----------- NEW ARG -----------")
