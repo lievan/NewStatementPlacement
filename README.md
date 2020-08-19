@@ -114,9 +114,9 @@ POST TEXT: [IDEA] Drop in volcanic activity NIL
 POST ENTITY: E-3NNLOF-764
 ```
 
-Or you can initialize a new argument object with an entity (string), type (string), name (string), text (string), children=None, and bare_text=True/False
+Or you can initialize a new Post object with an entity (string), type (string), name (string), text (string), children=None, and bare_text=True/False
 
-The top_n parameter tells us how many reccomendations we want to recieve 
+The top_n parameter tells us how many reccomendations we want to recieve, default top_n=5
 
 ```
 entity = 'newpost'
