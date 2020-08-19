@@ -58,15 +58,17 @@ argBERT_model = ArgumentMap.argBERT(model_name='path_to_argBERT_model', device='
 
 # Initialize Map
 
-Argument map should be a tab-delimited text file. The initialize_map function has one required parameter which is the map name. It has two optional parameters:
+Argument map should be a tab-delimited text file. The initialize_map function has one required parameter which is the map name. 
 
-test_sample_length -- how many test samples you want, default is 30
+Other parameters:
+
+test_sample_length -- how many test samples you want from the map
 
 bare_text -- Specifies if we have "enhanced" representations of the text. if you are using a "special-tokens" model, keep default bare_text=False. Else set bare_text=True
 
 ```
 map_name = 'path_to_argmap_text_file'
-map, dataset, test_samples = ArgumentMap.initialize_map(map_name, bare_text=False)
+map, dataset, test_samples = ArgumentMap.initialize_map(map_name, test_sample_length=30)
 ```
 
 # Fine tune argBERT to get a map specific model
@@ -127,6 +129,7 @@ reccomendations = ArgumentMap.get_reccomendations(new_post.text, new_post.type, 
 
 for rec in reccomendations:
   print(rec[1].text)
+  print(rec[1].entity
   print(rec[2])
   print(rec[0])
 ```
@@ -135,9 +138,9 @@ The "get_reccomendations" method returns a list of five suggestions. Each sugges
 
 index 0 of the suggestion is the predicted distance
 
-index 2 of the suggestion is the actual argument object
+index 1 of the suggestion is the actual argument object
 
-index 3 of the suggestion is the index of the suggested argument object from arg_map.argument_list 
+index 2 of the suggestion is the index of the suggested argument object from arg_map.argument_list 
 
 
 The add_argument function adds an argument to the argument map. The first parameter is the new_statement object, the second parameter is the entity of the chosen parent
