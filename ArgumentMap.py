@@ -586,19 +586,19 @@ class Map:
         return training_data, test_data
 
 
-def get_reccomendations(new_post, type, map, argBERT_model, bare_text=True, top_n=5):
+def get_reccomendations(new_post_text, new_post_type, map, argBERT_model, bare_text=True, top_n=5):
     parent_type = []
-    if new_post.type == "IDEA":
+    if new_post_type == "IDEA":
         parent_type.append("ISSUE")
         parent_type.append("IDEA")
-    elif new_post.type == "ISSUE":
+    elif new_post_type == "ISSUE":
         parent_type.append("IDEA")
-    elif new_post.type == "PRO" or type == "CON":
+    elif new_post_type == "PRO" or type == "CON":
         parent_type.append("IDEA")
         parent_type.append("PRO")
         parent_type.append("CON")
 
-    reccomendations = argBERT_model.predict_map_distances(map, new_post, parent_type, bare_text=bare_text)
+    reccomendations = argBERT_model.predict_map_distances(map, new_post_text, parent_type, bare_text=bare_text)
     top_n_recs = []
     for i in range(len(reccomendations[:top_n])):
         top_n_recs.append([reccomendations[i][2], reccomendations[i][0], map.post_list.index(reccomendations[i][0])])
