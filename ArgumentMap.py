@@ -469,29 +469,6 @@ def balance_data(dataset, max_length):
     return test_data
 
 
-def get_synthetic_data(parent, bare_text):
-    get_sentences = []
-    for child in parent.children_objs:
-        child_snippets = re.split('[?.!]', child.text)
-        for snippet in child_snippets:
-            if snippet != '':
-                get_sentences.append(snippet)
-
-    combinations_object = itertools.combinations(get_sentences, 2)
-    combinations_list = list(combinations_object)
-
-    training_data = []
-    for combo in combinations_list:
-        parent_text = get_parent_plus_children(parent, combo, bare_text=bare_text, synthetic=True,
-                                               get_sentences=get_sentences)
-        new_child = ''
-        for text in combo:
-            new_child += " "
-            new_child += text
-        training_data.append([parent_text, new_child, 1])
-    return training_data
-
-
 def get_post_from_entity(parent_entity, map):
     for post in map.post_list:
         if post.entity == parent_entity:
@@ -611,12 +588,12 @@ class Map:
 
 def get_reccomendations(new_post, type, map, argBERT_model, bare_text=True, top_n=5):
     parent_type = []
-    if type == "IDEA":
+    if new_post.type == "IDEA":
         parent_type.append("ISSUE")
         parent_type.append("IDEA")
-    elif type == "ISSUE":
+    elif new_post.type == "ISSUE":
         parent_type.append("IDEA")
-    elif type == "PRO" or type == "CON":
+    elif new_post.type == "PRO" or type == "CON":
         parent_type.append("IDEA")
         parent_type.append("PRO")
         parent_type.append("CON")
