@@ -10,6 +10,7 @@ import csv
 import gensim.downloader as api
 import nltk
 from nltk.cluster import KMeansClusterer
+from nltk.corpus import stopwords
 
 from transformers import RobertaForSequenceClassification, AdamW, RobertaConfig
 from transformers import RobertaTokenizer
