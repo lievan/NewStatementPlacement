@@ -4,6 +4,13 @@ import re
 import random
 import torch
 
+import gensim
+from scipy import spatial
+import csv
+import gensim.downloader as api
+import nltk
+from nltk.cluster import KMeansClusterer
+
 from transformers import RobertaForSequenceClassification, AdamW, RobertaConfig
 from transformers import RobertaTokenizer
 from transformers import get_linear_schedule_with_warmup
@@ -13,6 +20,104 @@ from torch.utils.data import TensorDataset, random_split
 from torch.utils.data import DataLoader, RandomSampler, SequentialSampler
 from torch import nn
 import numpy as np
+
+nltk.download('stopwords')
+stopword = set(stopwords.words('english'))
+
+class SemanticSearcher:
+    def __init__(self, path):
+        self.embeddings_dict = {}
+        print('Loading word vectors...')
+        with open(path, 'r') as f:
+            for line in f:
+                values = line.split()
+                split = len(values) - 300
+                word = values[split - 1]
+                vector = np.asarray(values[split:], "float32")
+                self.embeddings_dict[word] = vector
+        print('Word vectors loaded')
+
+    def get_mean_vector(self, text):
+
+        words = self.preprocess_text(text)
+
+        word_list = []
+        for word in words:
+            if word in self.embeddings_dict:
+                word_list.append(word)
+
+        word_vectors = []
+        for word in word_list:
+            word_vectors.append(self.embeddings_dict[word])
+        return np.sum(word_vectors, axis=0)
+
+    def predict_distance(self, post1, post2):
+        vector0 = self.get_mean_vector(post1)
+        vector1 = self.get_mean_vector(post2)
+        norm_vector0 = vector0
+        norm_vector1 = vector1
+        similarity = 1 - spatial.distance.cosine(norm_vector0, norm_vector1)
+        return similarity
+
+    def preprocess_text(self, text):
+        text = gensim.utils.simple_preprocess(text)
+        return_text = []
+        for tok in text:
+            if not tok in stopword:
+                return_text.append(tok)
+        return return_text
+
+    def get_cluster(self, new_post, map, NUM_CLUSTERS):
+        sentences = []
+        output_objs = []
+        for potential_parent in map.post_list:
+            sentences.append(potential_parent.text)
+            output_objs.append(potential_parent)
+        sentences.append(new_post.text)
+        output_objs.append(new_post)
+
+        post_embeddings = []
+        for post in sentences:
+            vec = self.get_mean_vector(post)
+            post_embeddings.append(vec)
+
+        kclusterer = KMeansClusterer(NUM_CLUSTERS, distance=nltk.cluster.util.cosine_distance, repeats=25)
+        assigned_clusters = kclusterer.cluster(post_embeddings, assign_clusters=True)
+
+        clusters = []
+        for i in range(NUM_CLUSTERS):
+            clusters.append([])
+
+        for assignment, output_obj in zip(assigned_clusters, output_objs):
+            clusters[assignment].append(output_obj)
+
+        return clusters
+
+    def get_recs(self, new_post, map, top_n=5):
+        parent_type = []
+        if new_post.type == "IDEA":
+            parent_type.append("ISSUE")
+            parent_type.append("IDEA")
+        elif new_post.type == "ISSUE":
+            parent_type.append("IDEA")
+        elif new_post.type == "PRO" or type == "CON":
+            parent_type.append("IDEA")
+            parent_type.append("PRO")
+            parent_type.append("CON")
+
+        similarity_scores = []
+        output_examples = []
+        for potential_parent in map.post_list:
+            if potential_parent.type in parent_type:
+                post1_text = get_parent_plus_children(potential_parent, new_post, bare_text=True)
+                post2_text = new_post.text
+
+                output_examples.append([self.predict_distance(post1_text, post2_text), potential_parent,
+                                        map.post_list.index(potential_parent)])
+
+        output_examples = sorted(output_examples, key=lambda x: x[0], reverse=True)
+
+        return output_examples[:top_n]
 
 
 class argBERT(nn.Module):
@@ -586,19 +691,19 @@ class Map:
         return training_data, test_data
 
 
-def get_reccomendations(new_post_text, new_post_type, map, argBERT_model, bare_text=True, top_n=5):
+def get_reccomendations(new_post, map, argBERT_model, bare_text=True, top_n=5):
     parent_type = []
-    if new_post_type == "IDEA":
+    if new_post.type == "IDEA":
         parent_type.append("ISSUE")
         parent_type.append("IDEA")
-    elif new_post_type == "ISSUE":
+    elif new_post.type == "ISSUE":
         parent_type.append("IDEA")
-    elif new_post_type == "PRO" or type == "CON":
+    elif new_post.type == "PRO" or type == "CON":
         parent_type.append("IDEA")
         parent_type.append("PRO")
         parent_type.append("CON")
 
-    reccomendations = argBERT_model.predict_map_distances(map, new_post_text, parent_type, bare_text=bare_text)
+    reccomendations = argBERT_model.predict_map_distances(map, new_post.text, parent_type, bare_text=bare_text)
     top_n_recs = []
     for i in range(len(reccomendations[:top_n])):
         top_n_recs.append([reccomendations[i][2], reccomendations[i][0], map.post_list.index(reccomendations[i][0])])
@@ -614,7 +719,7 @@ def input_new_post(map, argBERT_model, bare_text=True):
 
     new_statement = Post(entity=entity, type=post_type, name=title, text=text, children=None)
 
-    top_suggestions = get_reccomendations(new_statement.text, post_type, map, argBERT_model, bare_text=bare_text)
+    top_suggestions = get_reccomendations(new_statement, map, argBERT_model, bare_text=bare_text)
 
     print(" ")
     print("PRINTING PLACEMENT SUGESTIONS--------------")
@@ -647,7 +752,7 @@ def input_new_post(map, argBERT_model, bare_text=True):
     return map
 
 
-def initialize_map(map_name, test_sample_length=0, bare_text=False, add_synthetic_data=False, test_samples_path=None):
+def initialize_map(map_name, test_sample_length=0, bare_text=False, test_samples_path=None, add_synthetic_data=False):
     map = Map(map_name, bare_text=bare_text)
 
     print("Deliberation map initialized: displaying first 10 arguments")
