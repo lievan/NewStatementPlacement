@@ -2,3 +2,5 @@ transformers
 torch
 numpy
 pandas
+nltk
+gensim
