@@ -415,7 +415,7 @@ class argBERT(nn.Module):
 
 
 class Post:
-    def __init__(self, entity, type, name, text, children, bare_text=True):
+    def __init__(self, entity, type, name, text, children, bare_text=False):
         self.entity = entity
         self.type = type
         self.topic = name
@@ -452,7 +452,7 @@ class Post:
         self.children_objs = children
 
 
-def get_parent_plus_children(compared_parent, compared_child_text, bare_text=True, test_samples=[]):
+def get_parent_plus_children(compared_parent, compared_child_text, bare_text=False, test_samples=[]):
     full_text = ""
     full_text += compared_parent.text
 
@@ -602,7 +602,7 @@ def text_list_to_posts(path_name, map):
 
 
 class Map:
-    def __init__(self, map_name, bare_text=True, is_empty=False):
+    def __init__(self, map_name, bare_text=False, is_empty=False):
         self.post_list = []
         self.new_training_data = []
         self.max_traverse_steps = 0
@@ -660,7 +660,7 @@ class Map:
 
         self.new_training_data = self.new_training_data + new_data
 
-    def create_dataset(self, test_size, bare_text=True, add_synthetic_data=False, test_samples_path=None):
+    def create_dataset(self, test_size, bare_text=False, add_synthetic_data=False, test_samples_path=None):
         if test_samples_path is None:
             random_post_list = self.post_list
             random.shuffle(random_post_list)
@@ -692,7 +692,7 @@ class Map:
         return training_data, test_data
 
 
-def get_reccomendations(new_post, map, argBERT_model, bare_text=True, top_n=5):
+def get_reccomendations(new_post, map, argBERT_model, bare_text=False, top_n=5):
     parent_type = []
     if new_post.type == "IDEA":
         parent_type.append("ISSUE")
@@ -712,7 +712,7 @@ def get_reccomendations(new_post, map, argBERT_model, bare_text=True, top_n=5):
     return top_n_recs
 
 
-def input_new_post(map, argBERT_model, bare_text=True):
+def input_new_post(map, argBERT_model, bare_text=False):
     title = input("NEW STATEMENT TITLE: ")
     text = input("NEW STATEMENT TEXT: ")
     post_type = input("POST TYPE: ")
