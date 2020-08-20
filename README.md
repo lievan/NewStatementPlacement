@@ -172,3 +172,117 @@ child = "driverless cars are safe to use now and human drivers are error prone"
 
 taxonomic_distance = argBERT_model.predict_distance(parent, child)
 ```
+
+# Semantic Similarity and Clustering
+
+**Download word vectors**
+Download word vectors
+
+```
+!wget http://nlp.stanford.edu/data/glove.6B.zip
+```
+
+```
+!unzip glove.6B.zip
+```
+
+**Initialize SemanticSearcher model**
+
+Specify path to 300D word vectors text file 
+
+```
+similarity_model = ArgumentMap.SemanticSearcher('pathto/glove.6B.300d.txt')
+```
+
+Initialize new map, remember to set bare_text=True
+
+```
+map, dataset, test_samples  = ArgumentMap.initialize_map('map-E-1QSHFV5-200.txt', bare_text=True)
+```
+Get top 5 recs based on semantic similarity
+
+```
+entity = 'newpost'
+arg_type ='PRO'
+title='Ice melting is a sign of warming'
+text='Ice caps have been melting for years resulting in a loss of habitat'
+
+new_post = Post(entity=entity, type=arg_type, name=title, text=text, children=None, bare_text=True)
+
+recs = similarity_model.get_recs(new_post, map)
+
+for rec in recs:
+  print('NEW RECCOMENDATION ---')
+  print(' ')
+  print(rec[0])
+  print(rec[1].text)
+  print(rec[1].entity)
+  print(' ')
+ ```
+ Output:
+ 
+  ```
+  NEW RECCOMENDATION ---
+ 
+0.8413640260696411
+ice is melting worldwide NIL
+E-3OXYV4-608
+ 
+NEW RECCOMENDATION ---
+ 
+0.8234208226203918
+ice melting puts the polar bear at grave risk While there is some uncertainty on current polar bear population trends, one thing is certain. No sea ice means no seals which means no polar bears. With Arctic sea ice retreating at an accelerating rate, the polar bear is at grave risk of extinction
+E-3NNLOF-752
+ 
+NEW RECCOMENDATION ---
+ 
+0.8190104365348816
+polar melting Detrimental effects include loss of polar bear habitat, and increased mobile ice hazards to shipping.&#10;&#10;&#10;
+E-3OXYV4-597
+ 
+NEW RECCOMENDATION ---
+ 
+0.8114203214645386
+Antarctic ice has shown long-term growth Antarctic sea ice has shown long term growth since satellites began measurements in 1979. 
+E-3MAORN-161
+ 
+NEW RECCOMENDATION ---
+ 
+0.8043667674064636
+GreenlandÃÂs interior ice sheet has grown from 1993 to 2002  An international team of climatologists &amp; oceanographers estimate GreenlandÃÂs interior ice sheet has grown 6cm per year in areas above 1 500m between 1992 and 2003. Lead author, Ola Johannessen says sheet growth is due to increased snowfall brought about by variability in regional atmospheric circulation or the so-called North Atlantic Oscillation (Source: Latest Scientific Studies Refute Fears of Greenland Melt). 
+E-3NNLOF-730
+ 
+```
+
+You can also get reccomendations based on cluster
+
+```
+entity = 'newpost'
+arg_type ='PRO'
+title='Ice melting is a sign of warming'
+text='Ice caps have been melting for years resulting in a loss of habitat'
+
+new_post = Post(entity=entity, type=arg_type, name=title, text=text, children=None, bare_text=False)
+
+recs = similarity_model.get_cluster(new_post, map, NUM_CLUSTERS=20)
+
+
+
+for cluster in recs:
+  if new_post in cluster:
+    print('--NEW POST CLUSTER')
+    print('              ')
+    print('              ')
+    for post in cluster:
+      print(post.text)
+    print('              ')
+    print('              ')
+  else:
+    print('---OTHER CLUSTER')
+    print('              ')
+    print('              ')
+    for post in cluster:
+      print(post.text)
+    print('              ')
+    print('              ')
+```
