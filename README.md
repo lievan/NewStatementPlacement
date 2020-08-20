@@ -286,3 +286,27 @@ for cluster in recs:
     print('              ')
     print('              ')
 ```
+Output:
+
+```
+Other clusters
+.
+.
+.
+
+--NEW POST CLUSTER
+              
+              
+ice is melting worldwide NIL
+Arctic ice is disappearing Arctic sea ice has decreased steadily since the late 1970s.&#10;&#10;&#10;&lt;a target=newin href=
+Greenland ice loss is acceleratin Greenland ice loss is accelerating (Velicogna 2009, van den Broeke et al 2009)
+Glaciers are shrinking globally Glaciers are shrinking globally at an accelerating rate. 
+polar melting Detrimental effects include loss of polar bear habitat, and increased mobile ice hazards to shipping.&#10;&#10;&#10;
+The coastlines are losing ice While the Greenland interior is in mass balance, the coastlines are losing ice. Overall Greenland is losing ice mass at an accelerating rate. From 2002 to 2009, the rate of ice mass loss doubled.&lt;br&gt;&#10;&#10;&lt;a target=newin href=
+Ice melting is a sign of warming Ice caps have been melting for years resulting in a loss of habitat
+
+.
+.
+.
+Other clusters
+```
