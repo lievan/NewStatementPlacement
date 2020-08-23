@@ -1,5 +1,5 @@
 # NewStatementPlacement
-Reccomends a placement for an argument on a deliberation map. LICENSE:'Attribution-NonCommercial-ShareAlike 3.0'
+Reccomends a placement for a new post on a deliberation map. LICENSE:'Attribution-NonCommercial-ShareAlike 3.0'
 # Setup
 Requirements: transformers 3.0.2, torch 1.2.0, numpy, pandas
 
@@ -207,7 +207,7 @@ arg_type ='PRO'
 title='Ice melting is a sign of warming'
 text='Ice caps have been melting for years resulting in a loss of habitat'
 
-new_post = Post(entity=entity, type=arg_type, name=title, text=text, children=None, bare_text=True)
+new_post = ArgumentMap.Post(entity=entity, type=arg_type, name=title, text=text, children=None, bare_text=True)
 
 recs = similarity_model.get_recs(new_post, map)
 
@@ -262,7 +262,7 @@ arg_type ='PRO'
 title='Ice melting is a sign of warming'
 text='Ice caps have been melting for years resulting in a loss of habitat'
 
-new_post = Post(entity=entity, type=arg_type, name=title, text=text, children=None, bare_text=False)
+new_post = ArgumentMap.Post(entity=entity, type=arg_type, name=title, text=text, children=None, bare_text=True)
 
 recs = similarity_model.get_cluster(new_post, map, NUM_CLUSTERS=20)
 
