@@ -237,7 +237,7 @@ class argBERT(nn.Module):
             self.argBERT.eval()
 
             if validation_method == 'standard':
-                val_loss, precision = self.val_data(val_dataloader)
+                val_loss = self.val_data(val_dataloader)
                 if val_loss < self.best_accuracy_score:
                     self.best_accuracy_score = val_loss
                     print("Saving new model ------")
@@ -278,19 +278,12 @@ class argBERT(nn.Module):
             # Accumulate the validation loss.
             total_eval_loss += loss.item()
 
-            # Move logits and labels to CPU
-            logits = logits.detach().cpu().numpy()
-            label_ids = b_labels.to('cpu').numpy()
 
         avg_val_loss = total_eval_loss / len(val_dataloader)
 
         print("  VALIDATION LOSS: {0:.2f}".format(avg_val_loss))
 
-        accuracy = num_correct / (len(val_dataloader) * 32)
-
-        print("  ACCURACY: {0:.2f}".format(accuracy))
-
-        return avg_val_loss, precision
+        return avg_val_loss
 
     def train_data(self, train_dataloader, epochs=10):
 
