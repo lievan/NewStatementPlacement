@@ -1,5 +1,9 @@
 # NewStatementPlacement
-Reccomends a placement for a new post on a deliberation map. LICENSE:'Attribution-NonCommercial-ShareAlike 3.0'
+Reccomends a placement for a new post on a deliberation map. 
+
+# License
+'Attribution-NonCommercial-ShareAlike 3.0'
+
 # Setup
 Requirements: transformers 3.0.2, torch 1.2.0, numpy, pandas
 
