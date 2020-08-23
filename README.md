@@ -18,7 +18,6 @@ sudo apt-get install git-lfs
 ```
 
 **clone this repo**
-Clong the whole repo would download the four argBERT models, taking about 5 GB of space
 ```
 git lfs clone https://github.com/lievan/NewStatementPlacement.git
 ```
