@@ -1,5 +1,9 @@
 # NewStatementPlacement
-Reccomends a placement for a new post on a deliberation map. LICENSE:'Attribution-NonCommercial-ShareAlike 3.0'
+Reccomends a placement for a new post on a deliberation map. 
+
+# License
+'Attribution-NonCommercial-ShareAlike 3.0'
+
 # Setup
 Requirements: transformers 3.0.2, torch 1.2.0, numpy, pandas
 
@@ -8,15 +12,14 @@ pip install requirements.txt
 
 ```
 
-**install git-lfs**
+**Download argBERT models**
 ```
-sudo apt-get install git-lfs
+https://drive.google.com/drive/folders/1wz7BB7FcaS1V6mTBZM8XPpym-t89Ycx7?usp=sharing
 ```
 
 **clone this repo**
-Clong the whole repo would download the four argBERT models, taking about 5 GB of space
 ```
-git lfs clone https://github.com/lievan/NewStatementPlacement.git
+git clone https://github.com/lievan/NewStatementPlacement.git
 ```
 
 **import ArgumentMap module**
@@ -68,7 +71,7 @@ bare_text -- Specifies if we have "enhanced" representations of the text. if you
 
 ```
 map_name = 'path_to_argmap_text_file'
-map, dataset, test_samples = ArgumentMap.initialize_map(map_name, test_sample_length=30)
+map, dataset = ArgumentMap.initialize_map(map_name)
 ```
 
 # Fine tune argBERT to get a map specific model
@@ -80,7 +83,7 @@ bare_text parameter default False.
 We go through 10 epochs and save the best version of the model. The best version of the model is already updated in argBERT_model after fine-tuning, but is also saved in the specified output_path
 
 ```
-argBERT_model.fine_tune_model(dataset, test_samples, arg_map, output_path='./best_model', bare_text=False)
+argBERT_model.fine_tune_model(dataset, map, output_path='./best_model')
 ```
 
 # Input new arguments
