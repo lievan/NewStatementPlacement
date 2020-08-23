@@ -43,13 +43,18 @@ takes enhanced parent text snippets that contain IDEA, ISSUE, PRO, CON, as well 
 
 [enhanced parent text] + [new statement type + new statement text] --> argBERT-type-included --> taxonomic distance score
 
-**argBERT-driverlessdar-specialtokens**
+**argBERT-driverlesscar-specialtokens**
 
-map specific version of argBERT-type-included.
+map specific version of argBERT-includes-special-tokens
 
 **argBERT-globalwarming-specialtokens** 
 
-map specific version of argBERT-type-included.
+map specific version of argBERT-includes-special-tokens
+
+**argBERT-crowdcomputing-specialtokens**
+
+map specific version of argBERT-includes-special-tokens
+
 
 
 
