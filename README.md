@@ -68,7 +68,7 @@ bare_text -- Specifies if we have "enhanced" representations of the text. if you
 
 ```
 map_name = 'path_to_argmap_text_file'
-map, dataset, test_samples = ArgumentMap.initialize_map(map_name, test_sample_length=30)
+map, dataset = ArgumentMap.initialize_map(map_name)
 ```
 
 # Fine tune argBERT to get a map specific model
@@ -80,7 +80,7 @@ bare_text parameter default False.
 We go through 10 epochs and save the best version of the model. The best version of the model is already updated in argBERT_model after fine-tuning, but is also saved in the specified output_path
 
 ```
-argBERT_model.fine_tune_model(dataset, test_samples, arg_map, output_path='./best_model', bare_text=False)
+argBERT_model.fine_tune_model(dataset, map, output_path='./best_model')
 ```
 
 # Input new arguments
