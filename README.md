@@ -12,14 +12,14 @@ pip install requirements.txt
 
 ```
 
-**install git-lfs**
+**Download argBERT models**
 ```
-sudo apt-get install git-lfs
+https://drive.google.com/drive/folders/1wz7BB7FcaS1V6mTBZM8XPpym-t89Ycx7?usp=sharing
 ```
 
 **clone this repo**
 ```
-git lfs clone https://github.com/lievan/NewStatementPlacement.git
+git clone https://github.com/lievan/NewStatementPlacement.git
 ```
 
 **import ArgumentMap module**
