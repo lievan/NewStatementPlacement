@@ -29,7 +29,7 @@ from NewStatementPlacement import ArgumentMap
 
 # Initialize argBERT model
 
-There are four argBERT models available:
+Models available:
 
 **argBERT-standard**
 
