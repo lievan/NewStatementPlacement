@@ -272,7 +272,7 @@ text='Ice caps have been melting for years resulting in a loss of habitat'
 
 new_post = ArgumentMap.Post(entity=entity, type=arg_type, name=title, text=text, children=None, bare_text=True)
 
-recs = similarity_model.get_cluster(new_post, map, NUM_CLUSTERS=20)
+recs = similarity_model.get_clusters(new_post, map, NUM_CLUSTERS=20)
 
 
 
