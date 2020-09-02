@@ -1,6 +1,8 @@
 # NewStatementPlacement
 Reccomends a placement for a new post on a deliberation map. 
 
+For more info on argBERT, see https://docs.google.com/presentation/d/1XRmIDxqlrO5DoLFufQfgelbiVb55GroV0Em-t4OyQHM/edit?usp=sharing
+
 # License
 'Attribution-NonCommercial-ShareAlike 3.0'
 
